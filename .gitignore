@@ -12,6 +12,7 @@ ml/**/*.pkl
 ml/**/*.joblib
 ml/data/raw/
 ml/.ipynb_checkpoints/
+backend/ml_models/
 
 # --- Node / React (frontend/) ---
 frontend/node_modules/

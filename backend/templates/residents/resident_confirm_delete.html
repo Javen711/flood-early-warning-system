@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Delete resident{% endblock %}
+{% block content %}
+  <h1>Delete resident</h1>
+  <div class="card" style="max-width:480px;">
+    <p>Are you sure you want to delete <strong>{{ object.full_name }}</strong>?</p>
+    <form method="post">
+      {% csrf_token %}
+      <button type="submit" class="btn danger">Yes, delete</button>
+      <a href="{% url 'resident-list' %}" class="btn secondary">Cancel</a>
+    </form>
+  </div>
+{% endblock %}

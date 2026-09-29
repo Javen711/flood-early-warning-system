@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}AFEWS{% endblock %} · AFEWS</title>
+  <style>
+    :root {
+      --navy: #1b2a4a;
+      --accent: #0f6fb0;
+      --bg: #f4f6f9;
+      --card: #ffffff;
+      --border: #dde3ea;
+      --text: #1f2937;
+      --low: #2f7d51;
+      --medium: #b5651d;
+      --high: #a4243b;
+      --muted: #6b7280;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+    nav {
+      background: var(--navy);
+      color: white;
+      padding: 0.9rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+    nav .brand { font-weight: 700; font-size: 1.05rem; }
+    nav a {
+      color: #dbe6f5;
+      text-decoration: none;
+      margin-left: 1.1rem;
+      font-size: 0.92rem;
+    }
+    nav a:hover { color: white; }
+    nav .links { display: flex; align-items: center; flex-wrap: wrap; }
+    main { max-width: 1080px; margin: 0 auto; padding: 1.75rem 1.25rem 3rem; }
+    h1 { font-size: 1.5rem; margin-bottom: 0.25rem; }
+    .subtitle { color: var(--muted); margin-top: 0; margin-bottom: 1.5rem; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.25rem;
+      margin-bottom: 1.25rem;
+    }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { text-align: left; padding: 0.55rem 0.6rem; border-bottom: 1px solid var(--border); font-size: 0.92rem; }
+    th { color: var(--muted); font-weight: 600; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.03em; }
+    .btn {
+      display: inline-block;
+      background: var(--accent);
+      color: white;
+      padding: 0.5rem 0.95rem;
+      border-radius: 6px;
+      text-decoration: none;
+      font-size: 0.88rem;
+      border: none;
+      cursor: pointer;
+    }
+    .btn:hover { opacity: 0.92; }
+    .btn.secondary { background: white; color: var(--accent); border: 1px solid var(--accent); }
+    .btn.danger { background: var(--high); }
+    .pill {
+      display: inline-block;
+      padding: 0.2rem 0.65rem;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: white;
+    }
+    .pill.LOW { background: var(--low); }
+    .pill.MEDIUM { background: var(--medium); }
+    .pill.HIGH { background: var(--high); }
+    .pill.UNKNOWN { background: var(--muted); }
+    .messages { list-style: none; padding: 0; margin: 0 0 1.25rem; }
+    .messages li {
+      padding: 0.65rem 0.9rem;
+      border-radius: 8px;
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+    }
+    .messages .success { background: #e6f4ea; color: #1e5631; }
+    .messages .warning { background: #fdf1e0; color: #8a5a00; }
+    .messages .error { background: #fbe9eb; color: #8c1f34; }
+    .messages .info { background: #e8f1fb; color: #234876; }
+    form p { margin: 0.7rem 0; }
+    label { display: block; font-size: 0.85rem; margin-bottom: 0.25rem; color: var(--muted); }
+    input, select, textarea {
+      width: 100%;
+      padding: 0.5rem 0.6rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 0.92rem;
+    }
+    .stat-row { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+    .stat {
+      flex: 1;
+      min-width: 120px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1rem;
+      text-align: center;
+    }
+    .stat .num { font-size: 1.8rem; font-weight: 700; }
+    .stat .label { color: var(--muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.03em; }
+    .actions { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
+    .muted { color: var(--muted); font-size: 0.85rem; }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="brand">AFEWS &mdash; Flood Early Warning</div>
+    <div class="links">
+      {% if user.is_authenticated %}
+        <a href="{% url 'dashboard' %}">Dashboard</a>
+        <a href="{% url 'zone-list' %}">Zones</a>
+        <a href="{% url 'resident-list' %}">Residents</a>
+        <a href="{% url 'reading-list' %}">Readings</a>
+        <a href="/admin/">Admin</a>
+        <span class="muted" style="margin-left:1.1rem;color:#c8d3e6;">{{ user.get_full_name|default:user.username }} ({{ user.get_role_display }})</span>
+        <form method="post" action="{% url 'logout' %}" style="display:inline;margin-left:0.8rem;">
+          {% csrf_token %}
+          <button type="submit" class="btn secondary" style="padding:0.3rem 0.7rem;background:transparent;border-color:#dbe6f5;color:#dbe6f5;">Log out</button>
+        </form>
+      {% else %}
+        <a href="{% url 'login' %}">Log in</a>
+      {% endif %}
+    </div>
+  </nav>
+  <main>
+    {% if messages %}
+      <ul class="messages">
+        {% for message in messages %}
+          <li class="{{ message.tags }}">{{ message }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

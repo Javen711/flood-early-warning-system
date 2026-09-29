@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Zones{% endblock %}
+{% block content %}
+  <h1>Zones</h1>
+  <p class="subtitle">Monitored settlement areas</p>
+  <div class="actions"><a href="{% url 'zone-add' %}" class="btn">+ Add zone</a></div>
+  <div class="card">
+    <table>
+      <thead>
+        <tr><th>Name</th><th>Ward</th><th>Elevation (m)</th><th>Drainage</th><th></th></tr>
+      </thead>
+      <tbody>
+        {% for zone in zones %}
+          <tr>
+            <td>{{ zone.zone_name }}</td>
+            <td>{{ zone.ward|default:"—" }}</td>
+            <td>{{ zone.elevation_m }}</td>
+            <td>{{ zone.get_drainage_quality_display }}</td>
+            <td>
+              <a href="{% url 'zone-edit' zone.id %}" class="btn secondary" style="padding:0.3rem 0.7rem;">Edit</a>
+              <a href="{% url 'zone-delete' zone.id %}" class="btn danger" style="padding:0.3rem 0.7rem;">Delete</a>
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="5" class="muted">No zones yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}

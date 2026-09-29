@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Residents{% endblock %}
+{% block content %}
+  <h1>Residents</h1>
+  <p class="subtitle">Registered to receive flood alerts</p>
+  <div class="actions"><a href="{% url 'resident-add' %}" class="btn">+ Add resident</a></div>
+  <div class="card">
+    <table>
+      <thead>
+        <tr><th>Name</th><th>Phone</th><th>Zone</th><th>Registered</th><th></th></tr>
+      </thead>
+      <tbody>
+        {% for resident in residents %}
+          <tr>
+            <td>{{ resident.full_name }}</td>
+            <td>{{ resident.phone_number }}</td>
+            <td>{{ resident.zone.zone_name }}</td>
+            <td>{{ resident.registered_at|date:"d M Y" }}</td>
+            <td>
+              <a href="{% url 'resident-edit' resident.id %}" class="btn secondary" style="padding:0.3rem 0.7rem;">Edit</a>
+              <a href="{% url 'resident-delete' resident.id %}" class="btn danger" style="padding:0.3rem 0.7rem;">Delete</a>
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="5" class="muted">No residents yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}

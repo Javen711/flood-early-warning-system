@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Delete zone{% endblock %}
+{% block content %}
+  <h1>Delete zone</h1>
+  <div class="card" style="max-width:480px;">
+    <p>Are you sure you want to delete <strong>{{ object.zone_name }}</strong>? This also removes its readings, predictions and residents.</p>
+    <form method="post">
+      {% csrf_token %}
+      <button type="submit" class="btn danger">Yes, delete</button>
+      <a href="{% url 'zone-list' %}" class="btn secondary">Cancel</a>
+    </form>
+  </div>
+{% endblock %}

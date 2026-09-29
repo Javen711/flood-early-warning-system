@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+  <h1>Flood risk dashboard</h1>
+  <p class="subtitle">Latest prediction per monitored zone</p>
+
+  {% if not model_is_trained %}
+    <div class="card" style="border-color:#f1c98a;background:#fdf6ea;">
+      <strong>The ML model hasn't been trained yet.</strong>
+      <p class="muted">Run <code>python manage.py train_flood_model</code> on the server before predictions can be generated.</p>
+    </div>
+  {% endif %}
+
+  <div class="stat-row">
+    <div class="stat"><div class="num">{{ risk_counts.HIGH }}</div><div class="label">High risk</div></div>
+    <div class="stat"><div class="num">{{ risk_counts.MEDIUM }}</div><div class="label">Medium risk</div></div>
+    <div class="stat"><div class="num">{{ risk_counts.LOW }}</div><div class="label">Low risk</div></div>
+    <div class="stat"><div class="num">{{ risk_counts.UNKNOWN }}</div><div class="label">No prediction yet</div></div>
+  </div>
+
+  <div class="actions">
+    <a href="{% url 'zone-add' %}" class="btn secondary">+ Add zone</a>
+    <a href="{% url 'reading-add' %}" class="btn secondary">+ Add reading</a>
+    {% if model_is_trained %}
+      <form method="post" action="{% url 'run-predictions-all' %}" style="display:inline;">
+        {% csrf_token %}
+        <button type="submit" class="btn">Run predictions for all zones</button>
+      </form>
+    {% endif %}
+  </div>
+
+  <div class="card">
+    <table>
+      <thead>
+        <tr>
+          <th>Zone</th>
+          <th>Ward</th>
+          <th>Latest risk</th>
+          <th>Confidence</th>
+          <th>Predicted at</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in zone_rows %}
+          <tr>
+            <td>{{ row.zone.zone_name }}</td>
+            <td>{{ row.zone.ward|default:"—" }}</td>
+            <td>
+              {% if row.prediction %}
+                <span class="pill {{ row.prediction.risk_level }}">{{ row.prediction.get_risk_level_display }}</span>
+              {% else %}
+                <span class="pill UNKNOWN">No data</span>
+              {% endif %}
+            </td>
+            <td>{% if row.prediction %}{{ row.prediction.confidence_score|floatformat:2 }}{% else %}—{% endif %}</td>
+            <td>{% if row.prediction %}{{ row.prediction.predicted_at|date:"d M Y, H:i" }}{% else %}—{% endif %}</td>
+            <td>
+              {% if model_is_trained %}
+                <form method="post" action="{% url 'run-prediction' row.zone.id %}" style="display:inline;">
+                  {% csrf_token %}
+                  <button type="submit" class="btn secondary" style="padding:0.3rem 0.7rem;">Predict</button>
+                </form>
+              {% endif %}
+              <a href="{% url 'zone-edit' row.zone.id %}" class="btn secondary" style="padding:0.3rem 0.7rem;">Edit</a>
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="6" class="muted">No zones yet. <a href="{% url 'zone-add' %}">Add one</a> to get started.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2 style="font-size:1.1rem;margin-top:0;">Recent alerts</h2>
+    <table>
+      <thead>
+        <tr><th>Zone</th><th>Risk</th><th>Predicted at</th></tr>
+      </thead>
+      <tbody>
+        {% for prediction in recent_alerts %}
+          <tr>
+            <td>{{ prediction.zone.zone_name }}</td>
+            <td><span class="pill {{ prediction.risk_level }}">{{ prediction.get_risk_level_display }}</span></td>
+            <td>{{ prediction.predicted_at|date:"d M Y, H:i" }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="3" class="muted">No alerts have been raised yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}

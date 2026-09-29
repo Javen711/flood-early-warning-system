@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Log in{% endblock %}
+{% block content %}
+  <div class="card" style="max-width:360px;margin:2rem auto;">
+    <h1>Log in</h1>
+    <p class="subtitle">AFEWS admin &amp; officer dashboard</p>
+    <form method="post">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button type="submit" class="btn" style="width:100%;">Log in</button>
+    </form>
+  </div>
+{% endblock %}

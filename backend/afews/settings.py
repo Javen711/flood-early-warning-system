@@ -52,7 +52,14 @@ INSTALLED_APPS = [
 
     # Local apps
     'core',
+    'accounts',
+    'zones',
+    'residents',
+    'monitoring',
+    'alerts',
 ]
+
+AUTH_USER_MODEL = 'accounts.User'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -75,7 +82,7 @@ ROOT_URLCONF = 'afews.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -94,19 +101,28 @@ WSGI_APPLICATION = 'afews.wsgi.application'
 # https://docs.djangoproject.com/en/6.1/ref/settings/#databases
 # Configured from backend/.env — see .env.example for the variables you need to set.
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': os.getenv('DB_NAME', 'afews_db'),
-        'USER': os.getenv('DB_USER', 'afews_user'),
-        'PASSWORD': os.getenv('DB_PASSWORD', ''),
-        'HOST': os.getenv('DB_HOST', 'localhost'),
-        'PORT': os.getenv('DB_PORT', '3306'),
-        'OPTIONS': {
-            'charset': 'utf8mb4',
-        },
+if os.getenv('DB_ENGINE') == 'sqlite':
+    # Quick local testing without a MySQL server, e.g. `DB_ENGINE=sqlite python manage.py test`
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'test_db.sqlite3',
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': os.getenv('DB_NAME', 'afews_db'),
+            'USER': os.getenv('DB_USER', 'afews_user'),
+            'PASSWORD': os.getenv('DB_PASSWORD', ''),
+            'HOST': os.getenv('DB_HOST', 'localhost'),
+            'PORT': os.getenv('DB_PORT', '3306'),
+            'OPTIONS': {
+                'charset': 'utf8mb4',
+            },
+        }
+    }
 
 
 # Password validation
@@ -146,6 +162,17 @@ USE_TZ = True
 STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Login (Phase: Login)
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'dashboard'
+LOGOUT_REDIRECT_URL = 'login'
+
+# Machine learning pipeline (Phase: ML)
+# Where the trained model + its metadata get saved/loaded from.
+ML_MODEL_DIR = BASE_DIR / 'ml_models'
+ML_MODEL_PATH = ML_MODEL_DIR / 'flood_risk_model.joblib'
+ML_METADATA_PATH = ML_MODEL_DIR / 'flood_risk_model_metadata.json'
 
 # Django REST Framework (used from Phase 5 onward)
 REST_FRAMEWORK = {
