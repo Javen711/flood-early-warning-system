@@ -21,6 +21,10 @@
   <div class="actions">
     <a href="{% url 'zone-add' %}" class="btn secondary">+ Add zone</a>
     <a href="{% url 'reading-add' %}" class="btn secondary">+ Add reading</a>
+    <form method="post" action="{% url 'fetch-weather' %}" style="display:inline;">
+      {% csrf_token %}
+      <button type="submit" class="btn secondary">Fetch live rainfall</button>
+    </form>
     {% if model_is_trained %}
       <form method="post" action="{% url 'run-predictions-all' %}" style="display:inline;">
         {% csrf_token %}

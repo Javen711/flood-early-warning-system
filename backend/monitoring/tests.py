@@ -124,3 +124,48 @@ class DashboardViewTests(TestCase):
         response = self.client.get(reverse('dashboard'))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Dashboard Zone')
+
+
+class LiveWeatherTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username='officer2', password='testpass123')
+        self.zone = Zone.objects.create(
+            zone_name='Weather Zone', elevation_m=Decimal('12'),
+            latitude=Decimal('-1.3133'), longitude=Decimal('36.7876'),
+        )
+
+    def test_get_recent_rainfall_takes_the_larger_of_yesterday_and_today(self):
+        from unittest import mock
+        from . import weather
+        with mock.patch.object(weather, 'fetch_daily_rainfall', return_value=[42.5, 3.0]):
+            self.assertEqual(weather.get_recent_rainfall_mm(-1.3, 36.7), 42.5)
+
+    def test_live_reading_is_saved_with_weather_source_and_carries_water_level(self):
+        from unittest import mock
+        from . import weather
+        from .services import fetch_live_reading_for_zone
+        EnvironmentalData.objects.create(zone=self.zone, rainfall_mm=Decimal('1'), water_level_cm=Decimal('77'))
+        with mock.patch.object(weather, 'fetch_daily_rainfall', return_value=[10.0, 55.25]):
+            reading = fetch_live_reading_for_zone(self.zone)
+        self.assertEqual(reading.source, EnvironmentalData.Source.WEATHER_API)
+        self.assertEqual(reading.rainfall_mm, Decimal('55.25'))
+        self.assertEqual(reading.water_level_cm, Decimal('77'))
+
+    def test_zone_without_coordinates_is_rejected(self):
+        from .services import NoCoordinatesError, fetch_live_reading_for_zone
+        zone = Zone.objects.create(zone_name='No Coords', elevation_m=Decimal('20'))
+        with self.assertRaises(NoCoordinatesError):
+            fetch_live_reading_for_zone(zone)
+
+    def test_dashboard_button_saves_readings_and_reports_service_failure(self):
+        from unittest import mock
+        from . import weather
+        self.client.login(username='officer2', password='testpass123')
+        with mock.patch.object(weather, 'fetch_daily_rainfall', return_value=[0.0, 20.0]):
+            self.client.post(reverse('fetch-weather'))
+        self.assertEqual(EnvironmentalData.objects.filter(zone=self.zone, source='WEATHER_API').count(), 1)
+
+        with mock.patch.object(weather, 'fetch_daily_rainfall', side_effect=weather.WeatherError('offline')):
+            response = self.client.post(reverse('fetch-weather'), follow=True)
+        self.assertContains(response, 'Not updated')
+        self.assertEqual(EnvironmentalData.objects.filter(zone=self.zone, source='WEATHER_API').count(), 1)

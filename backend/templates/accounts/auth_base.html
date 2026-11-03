@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Sign in{% endblock %} · AFEWS</title>
+  <style>
+    :root {
+      --river: #0a3441;
+      --river-deep: #062530;
+      --water: #2a9bb5;
+      --mist: #eaf1f3;
+      --paper: #ffffff;
+      --ink: #0d1f26;
+      --muted: #5a6f78;
+      --line: #cfdce1;
+      --amber: #f2a33a;
+      --low: #2f7d51;
+      --medium: #b5651d;
+      --high: #a4243b;
+      --error-bg: #fbe9eb;
+      --error-text: #8c1f34;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI Variable", "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+      color: var(--ink);
+      background: var(--mist);
+    }
+    .page { min-height: 100%; display: grid; grid-template-columns: minmax(320px, 5fr) minmax(360px, 6fr); }
+
+    /* ---------- Left: the gauge ---------- */
+    .gauge-panel {
+      background: var(--river);
+      color: #e6f1f4;
+      padding: 3rem clamp(1.5rem, 4vw, 3.5rem);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+    }
+    .brand { font-weight: 700; font-size: 1.05rem; letter-spacing: 0.01em; }
+    .brand small { display: block; font-weight: 400; color: #9fc0c9; font-size: 0.85rem; margin-top: 0.15rem; }
+
+    .gauge-wrap { display: flex; align-items: flex-end; gap: 2rem; margin: 2.5rem 0; }
+    .gauge {
+      position: relative;
+      width: 76px;
+      height: 300px;
+      border: 2px solid #9fc0c9;
+      border-radius: 6px;
+      background: var(--river-deep);
+      flex: none;
+      overflow: hidden;
+    }
+    .bands { position: absolute; inset: 0; display: flex; flex-direction: column; }
+    .bands span { flex: 1; opacity: 0.28; }
+    .bands .b-high { background: var(--high); }
+    .bands .b-medium { background: var(--medium); }
+    .bands .b-low { background: var(--low); }
+    .water {
+      position: absolute;
+      left: 0; right: 0; bottom: 0;
+      height: 46%;
+      background: linear-gradient(180deg, #3fb2cc, var(--water));
+      border-top: 2px solid #8fdcee;
+      animation: rise 1.8s cubic-bezier(.2,.7,.2,1) 1 both;
+    }
+    @keyframes rise { from { height: 6%; } to { height: 46%; } }
+    .ticks {
+      position: absolute; inset: 0;
+      background: repeating-linear-gradient(to bottom, transparent 0, transparent 28px, rgba(255,255,255,0.35) 28px, rgba(255,255,255,0.35) 30px);
+      pointer-events: none;
+    }
+    .legend { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; justify-content: space-between; height: 300px; font-size: 0.92rem; }
+    .legend li { display: flex; align-items: center; gap: 0.6rem; color: #d3e5ea; }
+    .legend i { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+    .legend .l-high i { background: var(--high); }
+    .legend .l-medium i { background: var(--medium); }
+    .legend .l-low i { background: var(--low); }
+
+    .pitch h2 { font-size: clamp(1.4rem, 2.4vw, 1.9rem); line-height: 1.2; margin: 0 0 0.75rem; font-weight: 700; max-width: 22ch; }
+    .pitch p { margin: 0; color: #a9c6ce; max-width: 40ch; line-height: 1.5; }
+
+    /* ---------- Right: the form ---------- */
+    .form-panel { display: flex; align-items: center; justify-content: center; padding: 2.5rem 1.5rem; }
+    .form-card { width: 100%; max-width: 380px; }
+    .form-card h1 { font-size: 1.7rem; margin: 0 0 0.35rem; }
+    .form-card .lead { color: var(--muted); margin: 0 0 1.75rem; line-height: 1.45; }
+
+    .error {
+      background: var(--error-bg);
+      color: var(--error-text);
+      border-left: 4px solid var(--high);
+      padding: 0.7rem 0.9rem;
+      border-radius: 4px;
+      font-size: 0.92rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .field { margin-bottom: 1.1rem; }
+    .field label { display: block; font-size: 0.92rem; font-weight: 600; margin-bottom: 0.35rem; }
+    .field select, .field input {
+      width: 100%;
+      padding: 0.75rem 0.85rem;
+      font-size: 1rem;
+      border: 1.5px solid var(--line);
+      border-radius: 6px;
+      background: var(--paper);
+      color: var(--ink);
+    }
+    .field select:focus, .field input:focus { outline: 3px solid rgba(42, 155, 181, 0.35); border-color: var(--water); }
+    .pw-row { position: relative; }
+    .pw-row input { padding-right: 4.5rem; }
+    .pw-toggle {
+      position: absolute; right: 0.4rem; top: 50%; transform: translateY(-50%);
+      background: none; border: none; color: var(--water); font-weight: 600; font-size: 0.88rem;
+      padding: 0.4rem 0.55rem; cursor: pointer; border-radius: 4px;
+    }
+    .pw-toggle:focus-visible { outline: 3px solid rgba(42, 155, 181, 0.35); }
+
+    .submit {
+      width: 100%;
+      margin-top: 0.4rem;
+      padding: 0.85rem 1rem;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--river-deep);
+      background: var(--amber);
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .submit:hover { background: #f5b04f; }
+    .submit:focus-visible { outline: 3px solid var(--river); outline-offset: 2px; }
+
+    .field .hint { color: var(--muted); font-size: 0.85rem; margin: 0.3rem 0 0; }
+    .field .field-error { color: var(--error-text); font-size: 0.88rem; margin: 0.3rem 0 0; }
+    .alt-link { margin-top: 1.25rem; font-size: 0.95rem; }
+    .alt-link a { color: #0d6e86; font-weight: 600; }
+    .help { margin-top: 1.5rem; color: var(--muted); font-size: 0.88rem; line-height: 1.45; }
+
+    @media (max-width: 820px) {
+      .page { grid-template-columns: 1fr; }
+      .gauge-panel { padding: 1.5rem; }
+      .gauge-wrap { display: none; }
+      .pitch { margin-top: 1.25rem; }
+      .form-panel { padding: 2rem 1.25rem 3rem; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .water { animation: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <aside class="gauge-panel">
+      <div class="brand">AFEWS<small>Flood Early Warning System</small></div>
+
+      <div class="gauge-wrap" aria-hidden="true">
+        <div class="gauge">
+          <div class="bands"><span class="b-high"></span><span class="b-medium"></span><span class="b-low"></span></div>
+          <div class="water"></div>
+          <div class="ticks"></div>
+        </div>
+        <ul class="legend">
+          <li class="l-high"><i></i>High risk</li>
+          <li class="l-medium"><i></i>Medium risk</li>
+          <li class="l-low"><i></i>Low risk</li>
+        </ul>
+      </div>
+
+      <div class="pitch">
+        <h2>{% block pitch_heading %}See which zones are at risk before the rain arrives.{% endblock %}</h2>
+        <p>{% block pitch_text %}Rainfall, water level, elevation and drainage are combined into one risk level for each informal settlement zone.{% endblock %}</p>
+      </div>
+    </aside>
+
+    <main class="form-panel">
+      <div class="form-card">
+        {% block form_card %}{% endblock %}
+      </div>
+    </main>
+  </div>
+
+  {% block scripts %}{% endblock %}
+</body>
+</html>

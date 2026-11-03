@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}My zone{% endblock %}
+{% block content %}
+  {% if not resident %}
+    <h1>Welcome</h1>
+    <div class="card">
+      <p>Your resident record is no longer linked to this account.</p>
+      <p class="muted">Ask a disaster management officer to add you again, or create a new account.</p>
+    </div>
+  {% else %}
+    <h1>Hello, {{ resident.full_name }}</h1>
+    <p class="subtitle">{{ zone.zone_name }}{% if zone.ward %}, {{ zone.ward }}{% endif %} &middot; alerts go to {{ resident.phone_number }}</p>
+
+    <div class="card">
+      {% if prediction %}
+        <p class="muted" style="margin-top:0;">Flood risk in your zone</p>
+        <p style="font-size:1.6rem;margin:0.2rem 0 0.6rem;"><span class="pill {{ prediction.risk_level }}" style="font-size:1rem;padding:0.3rem 0.9rem;">{{ prediction.get_risk_level_display }}</span></p>
+        <p style="margin:0 0 0.4rem;">
+          {% if prediction.risk_level == 'HIGH' %}Move valuables and your family to higher ground now, and follow instructions from local authorities.
+          {% elif prediction.risk_level == 'MEDIUM' %}Stay alert. Keep your phone charged and be ready to move if the water rises.
+          {% else %}No action needed right now. Alerts will be sent here if this changes.{% endif %}
+        </p>
+        <p class="muted">Updated {{ prediction.predicted_at|date:"d M Y, H:i" }}</p>
+      {% else %}
+        <p style="margin:0;">No risk assessment has been made for your zone yet.</p>
+        <p class="muted">You will see it here as soon as officers run the first prediction.</p>
+      {% endif %}
+    </div>
+
+    <div class="card">
+      <h2 style="font-size:1.1rem;margin-top:0;">Recent alerts for your zone</h2>
+      <table>
+        <thead><tr><th>When</th><th>Risk</th><th>Message</th></tr></thead>
+        <tbody>
+          {% for alert in alerts %}
+            <tr>
+              <td>{{ alert.sent_at|date:"d M Y, H:i" }}</td>
+              <td><span class="pill {{ alert.prediction.risk_level }}">{{ alert.prediction.get_risk_level_display }}</span></td>
+              <td>{{ alert.message }}</td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="3" class="muted">No alerts have been sent to your zone.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% endif %}
+{% endblock %}

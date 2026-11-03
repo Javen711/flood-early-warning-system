@@ -16,6 +16,7 @@ class User(AbstractUser):
     class Role(models.TextChoices):
         ADMIN = 'ADMIN', 'System Administrator'
         OFFICER = 'OFFICER', 'Disaster Management Officer'
+        RESIDENT = 'RESIDENT', 'Resident'
 
     role = models.CharField(
         max_length=20,
@@ -27,6 +28,16 @@ class User(AbstractUser):
 
     def is_admin(self):
         return self.role == self.Role.ADMIN
+
+    @property
+    def is_resident(self):
+        return self.role == self.Role.RESIDENT
+
+    @property
+    def is_officer(self):
+        """Admins, officers and superusers can use the officer dashboard and
+        management screens. Residents cannot."""
+        return self.is_superuser or self.role in (self.Role.ADMIN, self.Role.OFFICER)
 
     def __str__(self):
         return self.get_full_name() or self.username

@@ -1,0 +1,27 @@
+{% extends "accounts/auth_base.html" %}
+{% block title %}Create account{% endblock %}
+{% block pitch_heading %}Know before the water reaches your street.{% endblock %}
+{% block pitch_text %}Register once and see your zone's flood risk and every alert sent to it. Officers add and manage zones separately.{% endblock %}
+{% block form_card %}
+        <h1>Create a resident account</h1>
+        <p class="lead">Your phone number is where flood alerts will be sent.</p>
+
+        {% if form.non_field_errors %}
+          <div class="error" role="alert">{{ form.non_field_errors|join:" " }}</div>
+        {% endif %}
+
+        <form method="post" novalidate>
+          {% csrf_token %}
+          {% for field in form %}
+            <div class="field">
+              <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+              {{ field }}
+              {% if field.errors %}<p class="field-error" role="alert">{{ field.errors|join:" " }}</p>{% endif %}
+              {% if field.help_text and not field.errors %}<p class="hint">{{ field.help_text|safe }}</p>{% endif %}
+            </div>
+          {% endfor %}
+          <button type="submit" class="submit">Create account</button>
+        </form>
+
+        <p class="alt-link">Already registered? <a href="{% url 'login' %}">Sign in</a></p>
+{% endblock %}

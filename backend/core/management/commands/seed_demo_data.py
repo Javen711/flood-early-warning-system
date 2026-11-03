@@ -20,6 +20,14 @@ DEMO_ZONES = [
     ("Kawangware", "Kawangware", Decimal("35.0"), Zone.DrainageQuality.GOOD, Decimal("10"), Decimal("5")),
 ]
 
+# Approximate centre of each demo zone, used for live weather lookups.
+DEMO_COORDINATES = {
+    "Kibera - Gatwekera": (Decimal("-1.3133"), Decimal("36.7876")),
+    "Mathare 4A": (Decimal("-1.2597"), Decimal("36.8584")),
+    "Mukuru Kwa Njenga": (Decimal("-1.3141"), Decimal("36.8664")),
+    "Kawangware": (Decimal("-1.2833"), Decimal("36.7467")),
+}
+
 DEMO_RESIDENTS_PER_ZONE = [
     ("Amina Wanjiru", "+254700111222"),
     ("Brian Otieno", "+254700333444"),
@@ -38,6 +46,9 @@ class Command(BaseCommand):
             )
             if was_created:
                 created_zones += 1
+            if not zone.has_coordinates and name in DEMO_COORDINATES:
+                zone.latitude, zone.longitude = DEMO_COORDINATES[name]
+                zone.save(update_fields=['latitude', 'longitude'])
 
             EnvironmentalData.objects.create(
                 zone=zone,

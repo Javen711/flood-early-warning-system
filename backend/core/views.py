@@ -1,7 +1,9 @@
 from django.contrib.auth.decorators import login_required
 from django.db import connection
 from django.http import JsonResponse
-from django.shortcuts import render
+from django.shortcuts import redirect, render
+
+from accounts.permissions import officer_required
 
 from monitoring.ml.predict import is_model_trained
 from monitoring.models import FloodPrediction
@@ -38,6 +40,14 @@ def health_check(request):
 
 @login_required
 def dashboard_view(request):
+    # Residents have their own page; send them there without an error message.
+    if request.user.is_resident:
+        return redirect('portal')
+    return _officer_dashboard(request)
+
+
+@officer_required
+def _officer_dashboard(request):
     """
     The main landing page after login: every zone with its most recent
     prediction, plus counts by risk level and the most recent alerts.

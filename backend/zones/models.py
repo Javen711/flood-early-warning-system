@@ -18,6 +18,14 @@ class Zone(models.Model):
     drainage_quality = models.CharField(
         max_length=10, choices=DrainageQuality.choices, default=DrainageQuality.MODERATE,
     )
+    latitude = models.DecimalField(
+        max_digits=9, decimal_places=6, null=True, blank=True,
+        help_text="Zone centre latitude (e.g. -1.3133). Needed to fetch live weather.",
+    )
+    longitude = models.DecimalField(
+        max_digits=9, decimal_places=6, null=True, blank=True,
+        help_text="Zone centre longitude (e.g. 36.7876). Needed to fetch live weather.",
+    )
     # Kept as a simple text field for now (e.g. a GeoJSON polygon or a
     # description). A dedicated GIS field type can replace this later
     # without breaking anything relying on this model.
@@ -32,6 +40,10 @@ class Zone(models.Model):
 
     def __str__(self):
         return self.zone_name
+
+    @property
+    def has_coordinates(self):
+        return self.latitude is not None and self.longitude is not None
 
     def latest_prediction(self):
         """Convenience helper used by the dashboard template."""

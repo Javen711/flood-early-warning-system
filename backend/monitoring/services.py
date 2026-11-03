@@ -78,3 +78,33 @@ def run_predictions_for_all_zones():
         except NoDataError:
             skipped.append(zone)
     return results, skipped
+
+
+class NoCoordinatesError(RuntimeError):
+    """Raised when a zone has no latitude/longitude, so weather can't be fetched."""
+
+
+def fetch_live_reading_for_zone(zone):
+    """
+    Pulls current rainfall from the weather service and saves it as a new
+    EnvironmentalData row (source = WEATHER_API).
+
+    The weather service has no water-level data, so the zone's most recent
+    water level is carried forward (0 if the zone has no readings yet).
+    """
+    from . import weather
+    from .models import EnvironmentalData
+
+    if not zone.has_coordinates:
+        raise NoCoordinatesError(
+            f"Zone '{zone.zone_name}' has no latitude/longitude. Edit the zone and add them."
+        )
+    rainfall_mm = weather.get_recent_rainfall_mm(zone.latitude, zone.longitude)
+    previous = zone.environmental_readings.order_by('-recorded_at').first()
+    water_level_cm = previous.water_level_cm if previous else 0
+    return EnvironmentalData.objects.create(
+        zone=zone,
+        rainfall_mm=round(rainfall_mm, 2),
+        water_level_cm=water_level_cm,
+        source=EnvironmentalData.Source.WEATHER_API,
+    )
