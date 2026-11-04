@@ -10,7 +10,7 @@ import pandas as pd
 
 from django.conf import settings
 
-from .dataset import FEATURE_COLUMNS, drainage_quality_to_score
+from .dataset import FEATURE_COLUMNS, drainage_quality_to_score, to_model_elevation
 
 _model_cache = None
 _metadata_cache = None
@@ -48,6 +48,7 @@ def reset_cache():
 
 def predict_risk(rainfall_mm: float, water_level_cm: float, elevation_m: float, drainage_quality: str):
     """
+    elevation_m is metres above sea level; it is rescaled for the model here.
     Returns (risk_level: str, confidence_score: float, model_version: str).
     confidence_score is the model's predicted probability for the winning class.
     """
@@ -56,7 +57,7 @@ def predict_risk(rainfall_mm: float, water_level_cm: float, elevation_m: float, 
     features = pd.DataFrame([{
         'rainfall_mm': float(rainfall_mm),
         'water_level_cm': float(water_level_cm),
-        'elevation_m': float(elevation_m),
+        'elevation_m': to_model_elevation(elevation_m),
         'drainage_score': drainage_quality_to_score(drainage_quality),
     }], columns=FEATURE_COLUMNS)
 

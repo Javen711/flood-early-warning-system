@@ -29,6 +29,24 @@ DRAINAGE_SCORE_MAP = {
 }
 
 
+# The model learned from a 5-60 "relative elevation" scale (see
+# generate_synthetic_dataset). Zones store real elevation above sea level, and
+# Nairobi's sub-counties only span about 1,600-1,800 m, so real values must be
+# rescaled onto the model's scale first. Otherwise every zone would look like
+# the highest ground and be predicted LOW.
+NAIROBI_LOW_M = 1600
+NAIROBI_HIGH_M = 1800
+MODEL_ELEVATION_MIN = 5
+MODEL_ELEVATION_MAX = 60
+
+
+def to_model_elevation(elevation_m) -> float:
+    """Maps elevation above sea level (1,600-1,800 m) to the model's 5-60 scale."""
+    fraction = (float(elevation_m) - NAIROBI_LOW_M) / (NAIROBI_HIGH_M - NAIROBI_LOW_M)
+    fraction = min(1.0, max(0.0, fraction))
+    return MODEL_ELEVATION_MIN + fraction * (MODEL_ELEVATION_MAX - MODEL_ELEVATION_MIN)
+
+
 def drainage_quality_to_score(drainage_quality: str) -> int:
     return DRAINAGE_SCORE_MAP.get(drainage_quality, 1)
 

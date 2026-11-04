@@ -48,6 +48,7 @@ INSTALLED_APPS = [
 
     # Third-party
     'rest_framework',
+    'rest_framework.authtoken',
     'corsheaders',
 
     # Local apps
@@ -57,6 +58,7 @@ INSTALLED_APPS = [
     'residents',
     'monitoring',
     'alerts',
+    'api',
 ]
 
 AUTH_USER_MODEL = 'accounts.User'
@@ -174,11 +176,19 @@ ML_MODEL_DIR = BASE_DIR / 'ml_models'
 ML_MODEL_PATH = ML_MODEL_DIR / 'flood_risk_model.joblib'
 ML_METADATA_PATH = ML_MODEL_DIR / 'flood_risk_model_metadata.json'
 
-# Django REST Framework (used from Phase 5 onward)
+# Django REST Framework: the JSON API used by the mobile app (see docs/api.md).
+# Token authentication, because a phone app has no browser cookies.
 REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+    ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
     ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 20,
+    # Slows down password guessing on sign-in and sign-up.
+    'DEFAULT_THROTTLE_RATES': {'auth': '30/min'},
 }
 
 

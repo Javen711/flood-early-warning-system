@@ -71,7 +71,7 @@ class PipelineServiceTests(TestCase):
         train_and_save_model(n_samples=150, random_state=1)
         predict_module.reset_cache()
         self.zone = Zone.objects.create(
-            zone_name='Pipeline Test Zone', elevation_m=Decimal('10'), drainage_quality=Zone.DrainageQuality.POOR,
+            zone_name='Pipeline Test Zone', elevation_m=Decimal('1600'), drainage_quality=Zone.DrainageQuality.POOR,
         )
         self.resident = Resident.objects.create(
             full_name='Test Resident', phone_number='+254700000000', zone=self.zone,
@@ -100,7 +100,7 @@ class PipelineServiceTests(TestCase):
             zone=self.zone, rainfall_mm=Decimal('5'), water_level_cm=Decimal('2'),
         )
         # Force a low-risk zone profile by overriding elevation/drainage on the fly
-        self.zone.elevation_m = Decimal('55')
+        self.zone.elevation_m = Decimal('1800')
         self.zone.drainage_quality = Zone.DrainageQuality.GOOD
         self.zone.save()
 
@@ -169,3 +169,51 @@ class LiveWeatherTests(TestCase):
             response = self.client.post(reverse('fetch-weather'), follow=True)
         self.assertContains(response, 'Not updated')
         self.assertEqual(EnvironmentalData.objects.filter(zone=self.zone, source='WEATHER_API').count(), 1)
+
+
+class ElevationScalingTests(TestCase):
+    def test_real_elevations_are_mapped_onto_the_models_scale(self):
+        from .ml.dataset import to_model_elevation
+        self.assertEqual(to_model_elevation(1600), 5)
+        self.assertEqual(to_model_elevation(1800), 60)
+        self.assertAlmostEqual(to_model_elevation(1700), 32.5)
+        self.assertEqual(to_model_elevation(1500), 5)     # below the range: clipped
+        self.assertEqual(to_model_elevation(2100), 60)    # above the range: clipped
+
+    def test_low_flooded_zone_and_high_dry_zone_get_different_risk(self):
+        """With real (1,600-1,800 m) elevations the model must still tell zones apart."""
+        train_and_save_model()  # full-size model, fixed seed
+        predict_module.reset_cache()
+        low_wet, _, _ = predict_module.predict_risk(140, 95, 1650, 'POOR')
+        high_dry, _, _ = predict_module.predict_risk(10, 5, 1780, 'GOOD')
+        self.assertIn(low_wet, ('MEDIUM', 'HIGH'))
+        self.assertEqual(high_dry, 'LOW')
+
+
+class NairobiZonesTests(TestCase):
+    def test_command_loads_17_zones_replaces_old_demo_zones_and_is_repeatable(self):
+        from django.core.management import call_command
+        from zones.nairobi import NAIROBI_SUBCOUNTIES, OLD_DEMO_ZONE_NAMES
+        old = Zone.objects.create(zone_name=OLD_DEMO_ZONE_NAMES[0], elevation_m=Decimal('15'))
+        Resident.objects.create(full_name='Old', phone_number='+254700000001', zone=old)
+        keep = Zone.objects.create(zone_name='My Own Zone', elevation_m=Decimal('1700'))
+
+        call_command('load_nairobi_zones', verbosity=0)
+        call_command('load_nairobi_zones', verbosity=0)  # second run must not duplicate
+
+        self.assertEqual(len(NAIROBI_SUBCOUNTIES), 17)
+        self.assertEqual(Zone.objects.filter(zone_name__endswith='Sub-County').count(), 17)
+        self.assertFalse(Zone.objects.filter(zone_name__in=OLD_DEMO_ZONE_NAMES).exists())
+        self.assertTrue(Zone.objects.filter(pk=keep.pk).exists())   # only the old demo zones are removed
+        self.assertEqual(EnvironmentalData.objects.count(), 17)      # one starting reading each, once
+        kibra = Zone.objects.get(zone_name='Kibra Sub-County')
+        self.assertTrue(kibra.has_coordinates)
+
+    def test_every_zone_has_valid_values(self):
+        from zones.nairobi import NAIROBI_SUBCOUNTIES
+        names = [row[0] for row in NAIROBI_SUBCOUNTIES]
+        self.assertEqual(len(set(names)), 17)
+        for name, wards, elevation, drainage, lat, lon, rain, water in NAIROBI_SUBCOUNTIES:
+            self.assertLessEqual(len(wards), 100, name)
+            self.assertTrue(1500 <= elevation <= 1900, name)
+            self.assertTrue(-1.5 < lat < -1.1 and 36.6 < lon < 37.1, name)
