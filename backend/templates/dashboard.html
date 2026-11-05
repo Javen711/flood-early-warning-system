@@ -1,40 +1,124 @@
 {% extends "base.html" %}
-{% block title %}Dashboard{% endblock %}
-{% block content %}
-  <h1>Flood risk dashboard</h1>
-  <p class="subtitle">Latest prediction per monitored zone</p>
+{% block title %}Overview{% endblock %}
+{% block body_class %}dark{% endblock %}
+{% block extra_head %}
+<style>
+  body.dark a { color: #fff; }
+  body.dark .card a { color: var(--water-dark); }
+  .bloom-row { display: flex; flex-wrap: wrap; gap: 2.25rem; align-items: center; margin-bottom: 2.5rem; }
+  .bloom-copy { flex: 1 1 340px; min-width: 0; }
+  .bloom-copy h1 { font-family: "Sora", var(--display); font-size: clamp(2.2rem, 4.6vw, 3.6rem); line-height: 1.05; font-weight: 800; letter-spacing: -0.02em; margin: 0; color: #fff; }
+  .bloom-copy p.lead { margin: 1rem 0 0; font-size: 1.05rem; line-height: 1.6; color: #c3d9df; max-width: 27rem; }
+  .legend { margin: 1.6rem 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 0.6rem; font-size: 0.95rem; }
+  .legend li { display: flex; align-items: center; gap: 0.75rem; }
+  .legend i { width: 26px; height: 14px; border-radius: 7px; display: inline-block; }
+  .bloom-actions { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 1.8rem; }
+  .bloom-actions form { display: inline; }
+  body.dark .btn.secondary { color: #fff; border-color: #6f97a2; }
+  body.dark .btn.secondary:hover { background: rgba(255,255,255,0.08); }
+  .top-zones { margin-top: 1.8rem; display: flex; flex-direction: column; gap: 0.7rem; max-width: 27rem; }
+  .top-zones a { display: flex; justify-content: space-between; align-items: center; gap: 1rem; background: var(--river-deep); border-radius: 12px; padding: 0.9rem 1.1rem; text-decoration: none; color: #fff; }
+  .top-zones a:hover { background: #0b3140; }
+  .top-zones b { display: block; font-size: 1.1rem; }
+  .top-zones small { color: #a9c6ce; }
 
+  .bloom-wrap { flex: 1.4 1 520px; min-width: 0; display: flex; justify-content: center; overflow: hidden; }
+  .bloom { position: relative; width: 680px; height: 680px; flex: none; }
+  .bloom .ring { position: absolute; left: 50%; top: 50%; border-radius: 50%; }
+  .bloom .petal { position: absolute; left: 50%; top: 50%; width: 26px; margin-left: -13px; border-radius: 0 0 13px 13px; transform-origin: 50% 0; }
+  .bloom .anchor { position: absolute; left: 50%; top: 50%; width: 0; height: 0; }
+  .bloom .anchor a { position: absolute; left: -48px; top: -8px; width: 96px; text-align: center; font-size: 11px; line-height: 1.15; font-weight: 600; color: #bcd6dd; text-decoration: none; }
+  .bloom .anchor a.hot { color: #fff; font-weight: 800; }
+  .bloom .anchor a:hover, .bloom .anchor a:focus-visible { color: var(--amber); text-decoration: underline; }
+  .bloom .centre { position: absolute; left: 50%; top: 50%; width: 168px; height: 168px; margin: -84px 0 0 -84px; border-radius: 50%; background: var(--river-deep); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+  .bloom .centre .n { font-family: "Sora", var(--display); font-size: 64px; font-weight: 800; line-height: 1; }
+  .bloom .centre .t { font-size: 13px; font-weight: 600; margin-top: 2px; }
+  .bloom .centre .s { font-size: 12px; color: #a9c6ce; margin-top: 8px; }
+  .petal, .anchor { animation: grow 0.9s cubic-bezier(.2,.7,.2,1) both; }
+  @keyframes grow { from { opacity: 0; } to { opacity: 1; } }
+  @media (max-width: 760px) { .bloom { zoom: 0.62; } }
+  @media (max-width: 480px) { .bloom { zoom: 0.5; } }
+  @media (prefers-reduced-motion: reduce) { .petal, .anchor { animation: none; } }
+
+  table.zones td:first-child { border-left: 6px solid var(--line); padding-left: 0.9rem; font-weight: 600; }
+  table.zones tr.r-HIGH td:first-child { border-left-color: var(--high); }
+  table.zones tr.r-MEDIUM td:first-child { border-left-color: var(--medium); }
+  table.zones tr.r-LOW td:first-child { border-left-color: var(--low); }
+  .tight { padding: 0.3rem 0.7rem; }
+  body.dark .card { color: var(--ink); }
+  body.dark .messages li { color: var(--ink); }
+  body.dark h2.on-dark { color: #fff; }
+</style>
+{% endblock %}
+{% block content %}
   {% if not model_is_trained %}
-    <div class="card" style="border-color:#f1c98a;background:#fdf6ea;">
+    <div class="card" style="border-top-color:var(--medium);">
       <strong>The ML model hasn't been trained yet.</strong>
       <p class="muted">Run <code>python manage.py train_flood_model</code> on the server before predictions can be generated.</p>
     </div>
   {% endif %}
 
-  <div class="stat-row">
-    <div class="stat"><div class="num">{{ risk_counts.HIGH }}</div><div class="label">High risk</div></div>
-    <div class="stat"><div class="num">{{ risk_counts.MEDIUM }}</div><div class="label">Medium risk</div></div>
-    <div class="stat"><div class="num">{{ risk_counts.LOW }}</div><div class="label">Low risk</div></div>
-    <div class="stat"><div class="num">{{ risk_counts.UNKNOWN }}</div><div class="label">No prediction yet</div></div>
+  <div class="bloom-row">
+    <section class="bloom-copy">
+      <h1>{{ zone_rows|length }} zone{{ zone_rows|length|pluralize }}.<br>One picture.</h1>
+      <p class="lead">Each petal is a zone. The longer and redder it grows, the closer it is to flooding. The dashed rings mark where Medium and High begin. Select a name to edit that zone.</p>
+      <ul class="legend">
+        <li><i style="background:#e0505c"></i>High risk, {{ risk_counts.HIGH }} zone{{ risk_counts.HIGH|pluralize }}</li>
+        <li><i style="background:#f2a33a"></i>Medium risk, {{ risk_counts.MEDIUM }} zone{{ risk_counts.MEDIUM|pluralize }}</li>
+        <li><i style="background:#6fcf97"></i>Low risk, {{ risk_counts.LOW }} zone{{ risk_counts.LOW|pluralize }}</li>
+        {% if risk_counts.UNKNOWN %}<li><i style="background:#7f99a3"></i>No prediction yet, {{ risk_counts.UNKNOWN }} zone{{ risk_counts.UNKNOWN|pluralize }}</li>{% endif %}
+      </ul>
+      <div class="bloom-actions">
+        {% if model_is_trained %}
+          <form method="post" action="{% url 'run-predictions-all' %}">
+            {% csrf_token %}
+            <button type="submit" class="btn">Run predictions for all zones</button>
+          </form>
+        {% endif %}
+        <form method="post" action="{% url 'fetch-weather' %}">
+          {% csrf_token %}
+          <button type="submit" class="btn secondary">Fetch live rainfall</button>
+        </form>
+        <a href="{% url 'zone-add' %}" class="btn secondary">+ Add zone</a>
+        <a href="{% url 'reading-add' %}" class="btn secondary">+ Add reading</a>
+      </div>
+      {% if top_petals %}
+        <div class="top-zones">
+          {% for p in top_petals %}
+            {% if p.level != 'LOW' and p.level != 'UNKNOWN' %}
+              <a href="{% url 'zone-edit' p.zone.id %}">
+                <span><b>{{ p.name }}</b><small>{% if p.prediction %}Predicted {{ p.prediction.predicted_at|date:"d M, H:i" }}{% endif %}</small></span>
+                <span class="pill {{ p.level }}">{{ p.prediction.get_risk_level_display }}</span>
+              </a>
+            {% endif %}
+          {% endfor %}
+        </div>
+      {% endif %}
+    </section>
+
+    <section class="bloom-wrap" aria-label="Flood risk by zone">
+      <div class="bloom">
+        <div class="ring" style="width:314px;height:314px;margin:-157px 0 0 -157px;border:1px dashed rgba(255,255,255,0.3);"></div>
+        <div class="ring" style="width:375px;height:375px;margin:-188px 0 0 -188px;border:1px dashed rgba(224,80,92,0.7);"></div>
+        <div class="ring" style="width:480px;height:480px;margin:-240px 0 0 -240px;border:1px solid rgba(255,255,255,0.14);"></div>
+        {% for p in petals %}<div class="petal" style="{{ p.petal_style }}"></div>{% endfor %}
+        {% for p in petals %}
+          <div class="anchor" style="{{ p.anchor_style }}">
+            <a href="{% url 'zone-edit' p.zone.id %}" class="{{ p.label_class }}" title="{{ p.label_text }}">{{ p.name }}</a>
+          </div>
+        {% endfor %}
+        <div class="centre">
+          <div class="n" style="color:{% if risk_counts.HIGH %}#e0505c{% else %}#6fcf97{% endif %};">{{ risk_counts.HIGH }}</div>
+          <div class="t">zone{{ risk_counts.HIGH|pluralize }} at HIGH</div>
+          <div class="s">{{ risk_counts.MEDIUM }} medium, {{ risk_counts.LOW }} low</div>
+        </div>
+      </div>
+    </section>
   </div>
 
-  <div class="actions">
-    <a href="{% url 'zone-add' %}" class="btn secondary">+ Add zone</a>
-    <a href="{% url 'reading-add' %}" class="btn secondary">+ Add reading</a>
-    <form method="post" action="{% url 'fetch-weather' %}" style="display:inline;">
-      {% csrf_token %}
-      <button type="submit" class="btn secondary">Fetch live rainfall</button>
-    </form>
-    {% if model_is_trained %}
-      <form method="post" action="{% url 'run-predictions-all' %}" style="display:inline;">
-        {% csrf_token %}
-        <button type="submit" class="btn">Run predictions for all zones</button>
-      </form>
-    {% endif %}
-  </div>
-
+  <h2 class="on-dark">All zones</h2>
   <div class="card">
-    <table>
+    <table class="zones">
       <thead>
         <tr>
           <th>Zone</th>
@@ -47,7 +131,7 @@
       </thead>
       <tbody>
         {% for row in zone_rows %}
-          <tr>
+          <tr class="r-{{ row.prediction.risk_level|default:'UNKNOWN' }}">
             <td>{{ row.zone.zone_name }}</td>
             <td>{{ row.zone.ward|default:"—" }}</td>
             <td>
@@ -63,10 +147,10 @@
               {% if model_is_trained %}
                 <form method="post" action="{% url 'run-prediction' row.zone.id %}" style="display:inline;">
                   {% csrf_token %}
-                  <button type="submit" class="btn secondary" style="padding:0.3rem 0.7rem;">Predict</button>
+                  <button type="submit" class="btn secondary tight">Predict</button>
                 </form>
               {% endif %}
-              <a href="{% url 'zone-edit' row.zone.id %}" class="btn secondary" style="padding:0.3rem 0.7rem;">Edit</a>
+              <a href="{% url 'zone-edit' row.zone.id %}" class="btn secondary tight">Edit</a>
             </td>
           </tr>
         {% empty %}
@@ -76,8 +160,8 @@
     </table>
   </div>
 
+  <h2 class="on-dark">Recent alerts</h2>
   <div class="card">
-    <h2 style="font-size:1.1rem;margin-top:0;">Recent alerts</h2>
     <table>
       <thead>
         <tr><th>Zone</th><th>Risk</th><th>Predicted at</th></tr>

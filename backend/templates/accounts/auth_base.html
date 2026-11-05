@@ -4,6 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}Sign in{% endblock %} · AFEWS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
   <style>
     :root {
       --river: #0a3441;
@@ -20,6 +23,7 @@
       --high: #a4243b;
       --error-bg: #fbe9eb;
       --error-text: #8c1f34;
+      --display: "Barlow Condensed", "Arial Narrow", "Segoe UI", sans-serif;
     }
     * { box-sizing: border-box; }
     html, body { height: 100%; }
@@ -42,8 +46,8 @@
       position: relative;
       overflow: hidden;
     }
-    .brand { font-weight: 700; font-size: 1.05rem; letter-spacing: 0.01em; }
-    .brand small { display: block; font-weight: 400; color: #9fc0c9; font-size: 0.85rem; margin-top: 0.15rem; }
+    .brand { font-family: var(--display); font-weight: 700; font-size: 2.6rem; line-height: 1; letter-spacing: 0.02em; }
+    .brand small { display: block; font-family: "Segoe UI", sans-serif; letter-spacing: 0; font-weight: 400; color: #9fc0c9; font-size: 0.85rem; margin-top: 0.15rem; }
 
     .gauge-wrap { display: flex; align-items: flex-end; gap: 2rem; margin: 2.5rem 0; }
     .gauge {
@@ -82,13 +86,13 @@
     .legend .l-medium i { background: var(--medium); }
     .legend .l-low i { background: var(--low); }
 
-    .pitch h2 { font-size: clamp(1.4rem, 2.4vw, 1.9rem); line-height: 1.2; margin: 0 0 0.75rem; font-weight: 700; max-width: 22ch; }
+    .pitch h2 { font-family: var(--display); font-size: clamp(2rem, 3.4vw, 2.9rem); line-height: 1.05; margin: 0 0 0.75rem; font-weight: 700; max-width: 18ch; }
     .pitch p { margin: 0; color: #a9c6ce; max-width: 40ch; line-height: 1.5; }
 
     /* ---------- Right: the form ---------- */
     .form-panel { display: flex; align-items: center; justify-content: center; padding: 2.5rem 1.5rem; }
     .form-card { width: 100%; max-width: 380px; }
-    .form-card h1 { font-size: 1.7rem; margin: 0 0 0.35rem; }
+    .form-card h1 { font-family: var(--display); font-size: 2.6rem; line-height: 1.05; margin: 0 0 0.35rem; }
     .form-card .lead { color: var(--muted); margin: 0 0 1.75rem; line-height: 1.45; }
 
     .error {

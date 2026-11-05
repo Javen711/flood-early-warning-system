@@ -5,6 +5,8 @@ from django.shortcuts import redirect, render
 
 from accounts.permissions import officer_required
 
+from .bloom import bloom_petals
+
 from monitoring.ml.predict import is_model_trained
 from monitoring.models import FloodPrediction
 from zones.models import Zone
@@ -63,6 +65,8 @@ def _officer_dashboard(request):
         prediction = row['prediction']
         risk_counts[prediction.risk_level if prediction else 'UNKNOWN'] += 1
 
+    petals = bloom_petals(zone_rows)
+
     recent_alerts = (
         FloodPrediction.objects.filter(alerts__isnull=False)
         .distinct()
@@ -71,6 +75,8 @@ def _officer_dashboard(request):
 
     return render(request, 'dashboard.html', {
         'zone_rows': zone_rows,
+        'petals': petals,
+        'top_petals': petals[:3],
         'risk_counts': risk_counts,
         'recent_alerts': recent_alerts,
         'model_is_trained': is_model_trained(),

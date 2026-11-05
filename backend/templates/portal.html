@@ -1,5 +1,35 @@
 {% extends "base.html" %}
 {% block title %}My zone{% endblock %}
+{% block extra_head %}
+<style>
+  .hero { position: relative; overflow: hidden; background: var(--river); color: #fff; min-height: 340px; padding: 2rem 2rem 2rem 7.5rem; margin-bottom: 1.8rem; }
+  .hero .water { position: absolute; left: 0; right: 0; bottom: 0; height: var(--level); background: linear-gradient(180deg, rgba(63,178,204,0.55), rgba(27,127,158,0.75)); border-top: 2px solid #8fdcee; animation: rise 1.6s cubic-bezier(.2,.7,.2,1) both; }
+  @keyframes rise { from { height: 6%; } to { height: var(--level); } }
+  .staff { position: absolute; left: 1.6rem; top: 1.4rem; bottom: 1.4rem; width: 26px; display: flex; flex-direction: column; z-index: 2;
+    background-image: repeating-linear-gradient(to bottom, transparent 0, transparent 26px, rgba(255,255,255,0.7) 26px, rgba(255,255,255,0.7) 28px); }
+  .staff i { flex: 1; }
+  .staff .h { background: var(--high); flex: 30; } .staff .m { background: var(--medium); flex: 35; } .staff .l { background: var(--low); flex: 35; }
+  .staff { background-image: none; }
+  .marker { position: absolute; left: 3.5rem; z-index: 3; width: 0; height: 0; border: 9px solid transparent; border-right: 14px solid var(--amber); transform: translateY(50%); bottom: calc(1.4rem + (100% - 2.8rem) * var(--frac)); }
+  .hero .in { position: relative; z-index: 3; }
+  .hero .hello { color: #a9c6ce; margin: 0; }
+  .hero .zone { font-family: var(--display); font-size: 2.2rem; font-weight: 700; margin: 0.1rem 0 0; line-height: 1.1; }
+  .hero .ward { color: #a9c6ce; font-size: 0.92rem; margin: 0.2rem 0 0; }
+  .hero .word { font-family: var(--display); font-weight: 700; font-size: clamp(5rem, 14vw, 8.5rem); line-height: 0.95; margin: 1.2rem 0 1.3rem; letter-spacing: -0.01em; }
+  .hero .advice { max-width: 34rem; font-size: 1.05rem; line-height: 1.5; margin: 0; }
+  .updated { margin-top: 1.2rem; font-size: 0.85rem; color: #cfe2e7; }
+  .tl { list-style: none; margin: 0; padding: 0; }
+  .tl li { position: relative; padding: 0 0 1.4rem 2.2rem; }
+  .tl li::before { content: ""; position: absolute; left: 6px; top: 8px; bottom: -4px; width: 2px; background: var(--line); }
+  .tl li:last-child::before { display: none; }
+  .tl li::after { content: ""; position: absolute; left: 0; top: 6px; width: 14px; height: 14px; border-radius: 50%; background: var(--dot); border: 3px solid #fff; box-sizing: border-box; }
+  .tl .lvl { font-family: var(--display); font-weight: 700; font-size: 1.5rem; color: var(--dot); }
+  .tl .when { color: var(--muted); font-size: 0.85rem; margin-left: 0.6rem; }
+  .tl p { margin: 0.1rem 0 0; line-height: 1.45; }
+  @media (max-width: 560px) { .hero { padding-left: 5.4rem; } }
+  @media (prefers-reduced-motion: reduce) { .hero .water { animation: none; } }
+</style>
+{% endblock %}
 {% block content %}
   {% if not resident %}
     <h1>Welcome</h1>
@@ -8,41 +38,42 @@
       <p class="muted">Ask a disaster management officer to add you again, or create a new account.</p>
     </div>
   {% else %}
-    <h1>Hello, {{ resident.full_name }}</h1>
-    <p class="subtitle">{{ zone.zone_name }}{% if zone.ward %}, {{ zone.ward }}{% endif %} &middot; alerts go to {{ resident.phone_number }}</p>
+    <section class="hero" style="--level: {% if prediction %}{% if prediction.risk_level == 'HIGH' %}86%{% elif prediction.risk_level == 'MEDIUM' %}55%{% else %}22%{% endif %}{% else %}8%{% endif %}; --frac: {% if prediction %}{% if prediction.risk_level == 'HIGH' %}0.86{% elif prediction.risk_level == 'MEDIUM' %}0.55{% else %}0.22{% endif %}{% else %}0.08{% endif %};">
+      <div class="water"></div>
+      <div class="staff" aria-hidden="true"><i class="h"></i><i class="m"></i><i class="l"></i></div>
+      <div class="marker" aria-hidden="true"></div>
+      <div class="in">
+        <p class="hello">Hello, {{ resident.full_name }}</p>
+        <p class="zone">{{ zone.zone_name }}</p>
+        {% if zone.ward %}<p class="ward">{{ zone.ward }}</p>{% endif %}
+        {% if prediction %}
+          <p class="word" aria-label="Flood risk {{ prediction.get_risk_level_display }}">{{ prediction.get_risk_level_display }}</p>
+          <p class="advice">
+            {% if prediction.risk_level == 'HIGH' %}Move valuables and your family to higher ground now, and follow instructions from local authorities.
+            {% elif prediction.risk_level == 'MEDIUM' %}Stay alert. Keep your phone charged and be ready to move if the water rises.
+            {% else %}No action needed right now. Alerts will be sent here if this changes.{% endif %}
+          </p>
+          <p class="updated">Updated {{ prediction.predicted_at|date:"d M Y, H:i" }}<br>Alerts go to {{ resident.phone_number }}</p>
+        {% else %}
+          <p class="word" style="font-size:3rem;">No data</p>
+          <p class="advice">No risk assessment has been made for your zone yet. You will see it here as soon as officers run the first prediction.</p>
+          <p class="updated">Alerts go to {{ resident.phone_number }}</p>
+        {% endif %}
+      </div>
+    </section>
 
-    <div class="card">
-      {% if prediction %}
-        <p class="muted" style="margin-top:0;">Flood risk in your zone</p>
-        <p style="font-size:1.6rem;margin:0.2rem 0 0.6rem;"><span class="pill {{ prediction.risk_level }}" style="font-size:1rem;padding:0.3rem 0.9rem;">{{ prediction.get_risk_level_display }}</span></p>
-        <p style="margin:0 0 0.4rem;">
-          {% if prediction.risk_level == 'HIGH' %}Move valuables and your family to higher ground now, and follow instructions from local authorities.
-          {% elif prediction.risk_level == 'MEDIUM' %}Stay alert. Keep your phone charged and be ready to move if the water rises.
-          {% else %}No action needed right now. Alerts will be sent here if this changes.{% endif %}
-        </p>
-        <p class="muted">Updated {{ prediction.predicted_at|date:"d M Y, H:i" }}</p>
-      {% else %}
-        <p style="margin:0;">No risk assessment has been made for your zone yet.</p>
-        <p class="muted">You will see it here as soon as officers run the first prediction.</p>
-      {% endif %}
-    </div>
-
-    <div class="card">
-      <h2 style="font-size:1.1rem;margin-top:0;">Recent alerts for your zone</h2>
-      <table>
-        <thead><tr><th>When</th><th>Risk</th><th>Message</th></tr></thead>
-        <tbody>
-          {% for alert in alerts %}
-            <tr>
-              <td>{{ alert.sent_at|date:"d M Y, H:i" }}</td>
-              <td><span class="pill {{ alert.prediction.risk_level }}">{{ alert.prediction.get_risk_level_display }}</span></td>
-              <td>{{ alert.message }}</td>
-            </tr>
-          {% empty %}
-            <tr><td colspan="3" class="muted">No alerts have been sent to your zone.</td></tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
+    <h2>Recent alerts for your zone</h2>
+    {% if alerts %}
+      <ul class="tl">
+        {% for alert in alerts %}
+          <li style="--dot: {% if alert.prediction.risk_level == 'HIGH' %}var(--high){% elif alert.prediction.risk_level == 'MEDIUM' %}var(--medium){% else %}var(--low){% endif %};">
+            <span class="lvl">{{ alert.prediction.get_risk_level_display }}</span><span class="when">{{ alert.sent_at|date:"d M Y, H:i" }}</span>
+            <p>{{ alert.message }}</p>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="muted">No alerts have been sent to your zone.</p>
+    {% endif %}
   {% endif %}
 {% endblock %}
