@@ -11,6 +11,7 @@ import pandas as pd
 from django.conf import settings
 
 from .dataset import FEATURE_COLUMNS, drainage_quality_to_score, to_model_elevation
+from .decision import decide_levels
 
 _model_cache = None
 _metadata_cache = None
@@ -50,7 +51,8 @@ def predict_risk(rainfall_mm: float, water_level_cm: float, elevation_m: float, 
     """
     elevation_m is metres above sea level; it is rescaled for the model here.
     Returns (risk_level: str, confidence_score: float, model_version: str).
-    confidence_score is the model's predicted probability for the winning class.
+    confidence_score is the model's probability for the chosen level. HIGH is
+    chosen as soon as its probability reaches the alert threshold (decision.py).
     """
     model, metadata = _load_model()
 
@@ -61,9 +63,6 @@ def predict_risk(rainfall_mm: float, water_level_cm: float, elevation_m: float, 
         'drainage_score': drainage_quality_to_score(drainage_quality),
     }], columns=FEATURE_COLUMNS)
 
-    risk_level = model.predict(features)[0]
-    probabilities = model.predict_proba(features)[0]
-    class_index = list(model.classes_).index(risk_level)
-    confidence_score = float(probabilities[class_index])
+    levels, confidences = decide_levels(model.classes_, model.predict_proba(features))
 
-    return risk_level, confidence_score, metadata['model_version']
+    return levels[0], confidences[0], metadata['model_version']

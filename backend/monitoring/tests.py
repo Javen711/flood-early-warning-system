@@ -217,3 +217,35 @@ class NairobiZonesTests(TestCase):
             self.assertLessEqual(len(wards), 100, name)
             self.assertTrue(1500 <= elevation <= 1900, name)
             self.assertTrue(-1.5 < lat < -1.1 and 36.6 < lon < 37.1, name)
+
+
+class HighThresholdTests(TestCase):
+    """The lower bar for HIGH (monitoring/ml/decision.py)."""
+
+    classes = ['HIGH', 'LOW', 'MEDIUM']
+
+    def test_high_is_chosen_at_the_threshold_even_if_medium_is_more_likely(self):
+        from .ml.decision import decide_levels
+        levels, confidences = decide_levels(self.classes, [[0.35, 0.15, 0.50]], threshold=0.30)
+        self.assertEqual(levels, ['HIGH'])
+        self.assertAlmostEqual(confidences[0], 0.35)
+
+    def test_below_the_threshold_the_most_likely_level_wins(self):
+        from .ml.decision import decide_levels
+        levels, confidences = decide_levels(self.classes, [[0.20, 0.10, 0.70], [0.10, 0.80, 0.10]], threshold=0.30)
+        self.assertEqual(levels, ['MEDIUM', 'LOW'])
+        self.assertAlmostEqual(confidences[0], 0.70)
+
+    def test_training_reports_both_ways_of_deciding(self):
+        from django.test import override_settings
+        import tempfile, pathlib
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp = pathlib.Path(tmp)
+            with override_settings(ML_MODEL_DIR=tmp, ML_MODEL_PATH=tmp / 'm.joblib', ML_METADATA_PATH=tmp / 'm.json'):
+                metadata = train_and_save_model(n_samples=600)
+        self.assertIn('plain_accuracy', metadata)
+        self.assertEqual(metadata['high_alert_threshold'], 0.30)
+        self.assertGreaterEqual(
+            metadata['classification_report']['HIGH']['recall'],
+            metadata['plain_classification_report']['HIGH']['recall'],
+        )

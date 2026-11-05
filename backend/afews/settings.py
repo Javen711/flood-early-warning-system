@@ -176,6 +176,9 @@ ML_MODEL_DIR = BASE_DIR / 'ml_models'
 ML_MODEL_PATH = ML_MODEL_DIR / 'flood_risk_model.joblib'
 ML_METADATA_PATH = ML_MODEL_DIR / 'flood_risk_model_metadata.json'
 
+# Call a zone HIGH once the model gives HIGH at least this chance (see monitoring/ml/decision.py).
+HIGH_ALERT_THRESHOLD = float(os.getenv('HIGH_ALERT_THRESHOLD', '0.30'))
+
 # Django REST Framework: the JSON API used by the mobile app (see docs/api.md).
 # Token authentication, because a phone app has no browser cookies.
 REST_FRAMEWORK = {

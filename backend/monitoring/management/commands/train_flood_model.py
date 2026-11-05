@@ -17,13 +17,20 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS(
             f"Trained model {metadata['model_version']} on {metadata['n_samples']} samples."
         ))
-        self.stdout.write(f"Overall accuracy: {metadata['accuracy']:.3f}")
-        self.stdout.write("Per-class metrics:")
-        for label in metadata['labels']:
-            row = metadata['classification_report'][label]
-            self.stdout.write(
-                f"  {label:>6}: precision={row['precision']:.2f}  "
-                f"recall={row['recall']:.2f}  f1={row['f1-score']:.2f}  support={int(row['support'])}"
-            )
+        def show(title, accuracy, report):
+            self.stdout.write(title)
+            self.stdout.write(f"  Overall accuracy: {accuracy:.3f}")
+            for label in metadata['labels']:
+                row = report[label]
+                self.stdout.write(
+                    f"  {label:>6}: precision={row['precision']:.2f}  "
+                    f"recall={row['recall']:.2f}  f1={row['f1-score']:.2f}  support={int(row['support'])}"
+                )
+
+        show("Plain model (highest probability wins):", metadata['plain_accuracy'], metadata['plain_classification_report'])
+        show(
+            f"What the app uses (HIGH once its probability reaches {metadata['high_alert_threshold']:.2f}):",
+            metadata['accuracy'], metadata['classification_report'],
+        )
         from django.conf import settings
         self.stdout.write(f"Model saved to: {settings.ML_MODEL_PATH}")

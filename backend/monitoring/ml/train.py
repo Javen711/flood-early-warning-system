@@ -14,6 +14,7 @@ from sklearn.model_selection import train_test_split
 from django.conf import settings
 
 from .dataset import FEATURE_COLUMNS, generate_synthetic_dataset
+from .decision import decide_levels, high_threshold
 
 
 def train_and_save_model(n_samples: int = 1200, random_state: int = 42) -> dict:
@@ -43,10 +44,19 @@ def train_and_save_model(n_samples: int = 1200, random_state: int = 42) -> dict:
     )
     model.fit(X_train, y_train)
 
-    y_pred = model.predict(X_test)
+    labels = sorted(y.unique())
+    probabilities = model.predict_proba(X_test)
+
+    # Plain "highest probability wins" ...
+    y_plain = model.predict(X_test)
+    plain_accuracy = accuracy_score(y_test, y_plain)
+    plain_report = classification_report(y_test, y_plain, output_dict=True)
+
+    # ... versus what the app really does: HIGH once its probability reaches the threshold.
+    threshold = high_threshold()
+    y_pred, _ = decide_levels(model.classes_, probabilities, threshold)
     accuracy = accuracy_score(y_test, y_pred)
     report = classification_report(y_test, y_pred, output_dict=True)
-    labels = sorted(y.unique())
     matrix = confusion_matrix(y_test, y_pred, labels=labels).tolist()
 
     settings.ML_MODEL_DIR.mkdir(parents=True, exist_ok=True)
@@ -58,9 +68,12 @@ def train_and_save_model(n_samples: int = 1200, random_state: int = 42) -> dict:
         'feature_columns': FEATURE_COLUMNS,
         'labels': labels,
         'n_samples': n_samples,
+        'high_alert_threshold': threshold,
         'accuracy': accuracy,
         'classification_report': report,
         'confusion_matrix': matrix,
+        'plain_accuracy': plain_accuracy,
+        'plain_classification_report': plain_report,
     }
     with open(settings.ML_METADATA_PATH, 'w') as f:
         json.dump(metadata, f, indent=2)
