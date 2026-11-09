@@ -175,6 +175,11 @@ LOGOUT_REDIRECT_URL = 'login'
 ML_MODEL_DIR = BASE_DIR / 'ml_models'
 ML_MODEL_PATH = ML_MODEL_DIR / 'flood_risk_model.joblib'
 ML_METADATA_PATH = ML_MODEL_DIR / 'flood_risk_model_metadata.json'
+# Written by `manage.py compute_rainfall_climatology`; training reads it to set what "heavy rain" means.
+RAINFALL_CLIMATOLOGY_PATH = ML_MODEL_DIR / 'rainfall_climatology.json'
+# Written by the same command: every zone-day of real rainfall (2015-2025) with the 3 days of rain before it.
+# train_flood_model draws its rainfall inputs from this file when it exists.
+RAINFALL_HISTORY_PATH = ML_MODEL_DIR / 'rainfall_history.csv'
 
 # Call a zone HIGH once the model gives HIGH at least this chance (see monitoring/ml/decision.py).
 HIGH_ALERT_THRESHOLD = float(os.getenv('HIGH_ALERT_THRESHOLD', '0.30'))

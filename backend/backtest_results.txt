@@ -1,0 +1,95 @@
+River level is unknown for past dates, so each case is run at: low 20 cm, moderate 60 cm, high 110 cm.
+
+24 April 2024, Mathare floods
+  What happened: The Nairobi River broke its banks; at least four people died in Mathare.
+  Source: Africanews, 25 Apr 2024: https://www.africanews.com/2024/04/25/kenya-floods-nairobi-residents-grapple-with-aftermath/
+  Zone                           Rain mm   low         moderate    high       Reported flooded?
+  Mathare Sub-County                14.1   LOW         MEDIUM      MEDIUM     YES
+  Dagoretti North Sub-County        11.5   LOW         LOW         LOW        not reported
+  Dagoretti South Sub-County        11.5   LOW         LOW         LOW        not reported
+  Embakasi Central Sub-County       10.1   LOW         LOW         MEDIUM     not reported
+  Embakasi East Sub-County           8.9   LOW         LOW         MEDIUM     not reported
+  Embakasi North Sub-County         14.1   MEDIUM      MEDIUM      HIGH       not reported
+  Embakasi South Sub-County         10.1   LOW         MEDIUM      MEDIUM     not reported
+  Embakasi West Sub-County          10.1   LOW         LOW         MEDIUM     not reported
+  Kamukunji Sub-County              14.4   LOW         LOW         MEDIUM     not reported
+  Kasarani Sub-County                9.5   LOW         LOW         MEDIUM     not reported
+  Kibra Sub-County                  11.5   LOW         LOW         MEDIUM     not reported
+  Lang'ata Sub-County               11.5   LOW         LOW         LOW        not reported
+  Makadara Sub-County               10.1   LOW         LOW         MEDIUM     not reported
+  Roysambu Sub-County               14.1   LOW         LOW         MEDIUM     not reported
+  Ruaraka Sub-County                14.1   LOW         MEDIUM      HIGH       not reported
+  Starehe Sub-County                14.4   LOW         LOW         MEDIUM     not reported
+  Westlands Sub-County              13.5   LOW         LOW         LOW        not reported
+
+6-7 March 2026, Nairobi flash floods
+  What happened: Rivers burst their banks overnight; the Star names Starehe, Kamukunji, Kibra, Kawangware, Parklands, Dandora, Kariobangi, Umoja, Kware and Viwandani among the places hit.
+  Source: The Star, 7 Mar 2026: https://www.the-star.co.ke/news/2026-03-07-flood-death-toll-rises-to-25-as-raging-rivers-wreak-havoc-in-nairobi
+  Zone                           Rain mm   low         moderate    high       Reported flooded?
+  Dagoretti North Sub-County        25.8   LOW         LOW         MEDIUM     YES
+  Embakasi North Sub-County         20.1   MEDIUM      HIGH        HIGH       YES
+  Embakasi South Sub-County         20.0   MEDIUM      HIGH        HIGH       YES
+  Embakasi West Sub-County          20.0   LOW         MEDIUM      MEDIUM     YES
+  Kamukunji Sub-County              21.9   LOW         MEDIUM      MEDIUM     YES
+  Kibra Sub-County                  25.8   MEDIUM      HIGH        HIGH       YES
+  Makadara Sub-County               20.0   LOW         MEDIUM      HIGH       YES
+  Starehe Sub-County                21.9   LOW         MEDIUM      MEDIUM     YES
+  Westlands Sub-County              18.5   LOW         LOW         LOW        YES
+  Dagoretti South Sub-County        25.8   LOW         LOW         LOW        not reported
+  Embakasi Central Sub-County       20.0   MEDIUM      MEDIUM      HIGH       not reported
+  Embakasi East Sub-County          25.1   MEDIUM      HIGH        HIGH       not reported
+  Kasarani Sub-County               26.3   MEDIUM      HIGH        HIGH       not reported
+  Lang'ata Sub-County               25.8   LOW         MEDIUM      MEDIUM     not reported
+  Mathare Sub-County                20.1   LOW         MEDIUM      HIGH       not reported
+  Roysambu Sub-County               20.1   MEDIUM      MEDIUM      HIGH       not reported
+  Ruaraka Sub-County                20.1   MEDIUM      MEDIUM      HIGH       not reported
+
+Control: 15 August 2025 (dry season)
+  What happened: No flood expected.
+  Zone                           Rain mm   low         moderate    high       Reported flooded?
+  Dagoretti North Sub-County         0.5   LOW         LOW         LOW        -
+  Dagoretti South Sub-County         0.5   LOW         LOW         LOW        -
+  Embakasi Central Sub-County        0.3   LOW         LOW         LOW        -
+  Embakasi East Sub-County           0.5   LOW         LOW         LOW        -
+  Embakasi North Sub-County          0.5   LOW         LOW         MEDIUM     -
+  Embakasi South Sub-County          0.3   LOW         LOW         LOW        -
+  Embakasi West Sub-County           0.3   LOW         LOW         LOW        -
+  Kamukunji Sub-County               0.1   LOW         LOW         LOW        -
+  Kasarani Sub-County                0.5   LOW         LOW         LOW        -
+  Kibra Sub-County                   0.5   LOW         LOW         LOW        -
+  Lang'ata Sub-County                0.5   LOW         LOW         LOW        -
+  Makadara Sub-County                0.3   LOW         LOW         LOW        -
+  Mathare Sub-County                 0.5   LOW         LOW         LOW        -
+  Roysambu Sub-County                0.5   LOW         LOW         LOW        -
+  Ruaraka Sub-County                 0.5   LOW         LOW         MEDIUM     -
+  Starehe Sub-County                 0.1   LOW         LOW         LOW        -
+  Westlands Sub-County               0.5   LOW         LOW         LOW        -
+
+Control: 25 January 2026 (dry season)
+  What happened: No flood expected.
+  Zone                           Rain mm   low         moderate    high       Reported flooded?
+  Dagoretti North Sub-County         0.0   LOW         LOW         LOW        -
+  Dagoretti South Sub-County         0.0   LOW         LOW         LOW        -
+  Embakasi Central Sub-County        0.0   LOW         LOW         LOW        -
+  Embakasi East Sub-County           0.0   LOW         LOW         LOW        -
+  Embakasi North Sub-County          0.0   LOW         LOW         LOW        -
+  Embakasi South Sub-County          0.0   LOW         LOW         LOW        -
+  Embakasi West Sub-County           0.0   LOW         LOW         LOW        -
+  Kamukunji Sub-County               0.0   LOW         LOW         LOW        -
+  Kasarani Sub-County                0.0   LOW         LOW         LOW        -
+  Kibra Sub-County                   0.0   LOW         LOW         LOW        -
+  Lang'ata Sub-County                0.0   LOW         LOW         LOW        -
+  Makadara Sub-County                0.0   LOW         LOW         LOW        -
+  Mathare Sub-County                 0.0   LOW         LOW         LOW        -
+  Roysambu Sub-County                0.0   LOW         LOW         LOW        -
+  Ruaraka Sub-County                 0.0   LOW         LOW         MEDIUM     -
+  Starehe Sub-County                 0.0   LOW         LOW         LOW        -
+  Westlands Sub-County               0.0   LOW         LOW         LOW        -
+
+Summary at a moderate river level (60 cm), flagged = MEDIUM or HIGH:
+  24 April 2024, Mathare floods: rain 14 mm, flagged 1 of 1 reported zones (0 as HIGH).
+  6-7 March 2026, Nairobi flash floods: rain 26 mm, flagged 7 of 9 reported zones (3 as HIGH).
+  Control: 15 August 2025 (dry season): rain 0 mm, flagged 0 of 17 zones (false alarms if no flood happened).
+  Control: 25 January 2026 (dry season): rain 0 mm, flagged 0 of 17 zones (false alarms if no flood happened).
+
+Rainfall is gridded data (roughly 10 km), so nearby zones get similar rain; what separates them is elevation and drainage.

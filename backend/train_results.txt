@@ -1,0 +1,13 @@
+Trained model rf-20261105-131312 on 5000 samples.
+Heavy-rain level used for training: 32 mm
+Plain model (highest probability wins):
+  Overall accuracy: 0.786
+    HIGH: precision=0.74  recall=0.76  f1=0.75  support=127
+     LOW: precision=0.89  recall=0.83  f1=0.86  support=562
+  MEDIUM: precision=0.64  recall=0.72  f1=0.68  support=311
+What the app uses (HIGH once its probability reaches 0.30):
+  Overall accuracy: 0.765
+    HIGH: precision=0.60  recall=0.89  f1=0.72  support=127
+     LOW: precision=0.89  recall=0.83  f1=0.86  support=562
+  MEDIUM: precision=0.64  recall=0.60  f1=0.62  support=311
+Model saved to: C:\Users\javen\Downloads\afews_project_phase0\flood-early-warning-system\backend\ml_models\flood_risk_model.joblib

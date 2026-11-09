@@ -14,6 +14,10 @@ class EnvironmentalData(models.Model):
 
     zone = models.ForeignKey(Zone, on_delete=models.CASCADE, related_name='environmental_readings')
     rainfall_mm = models.DecimalField(max_digits=6, decimal_places=2)
+    antecedent_rain_mm = models.DecimalField(
+        max_digits=6, decimal_places=2, default=0,
+        help_text="Total rain over the 3 days before the rainfall figure (how wet the ground already is). 0 if unknown.",
+    )
     water_level_cm = models.DecimalField(max_digits=6, decimal_places=2)
     source = models.CharField(max_length=20, choices=Source.choices, default=Source.MANUAL)
     recorded_at = models.DateTimeField(auto_now_add=True)

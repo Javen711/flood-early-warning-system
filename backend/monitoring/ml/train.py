@@ -13,7 +13,8 @@ from sklearn.model_selection import train_test_split
 
 from django.conf import settings
 
-from .dataset import FEATURE_COLUMNS, generate_synthetic_dataset
+from ..rainfall_history import load_history
+from .dataset import FEATURE_COLUMNS, generate_synthetic_dataset, heavy_rain_mm
 from .decision import decide_levels, high_threshold
 
 
@@ -27,7 +28,10 @@ def train_and_save_model(n_samples: int = 1200, random_state: int = 42) -> dict:
 
     Returns the metadata dict.
     """
-    df = generate_synthetic_dataset(n_samples=n_samples, random_state=random_state)
+    heavy_rain = heavy_rain_mm()
+    df = generate_synthetic_dataset(
+        n_samples=n_samples, random_state=random_state, heavy_rain=heavy_rain, history=load_history(),
+    )
 
     X = df[FEATURE_COLUMNS]
     y = df['risk_level']
@@ -68,6 +72,8 @@ def train_and_save_model(n_samples: int = 1200, random_state: int = 42) -> dict:
         'feature_columns': FEATURE_COLUMNS,
         'labels': labels,
         'n_samples': n_samples,
+        'heavy_rain_mm': heavy_rain,
+        'rainfall_source': df.attrs['rainfall_source'],
         'high_alert_threshold': threshold,
         'accuracy': accuracy,
         'classification_report': report,

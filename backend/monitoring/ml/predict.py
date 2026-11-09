@@ -47,21 +47,27 @@ def reset_cache():
     _metadata_cache = None
 
 
-def predict_risk(rainfall_mm: float, water_level_cm: float, elevation_m: float, drainage_quality: str):
+def predict_risk(rainfall_mm: float, water_level_cm: float, elevation_m: float, drainage_quality: str,
+                 antecedent_rain_mm: float = 0.0):
     """
     elevation_m is metres above sea level; it is rescaled for the model here.
+    antecedent_rain_mm is the rain on the 3 days before the rainfall figure.
     Returns (risk_level: str, confidence_score: float, model_version: str).
     confidence_score is the model's probability for the chosen level. HIGH is
     chosen as soon as its probability reaches the alert threshold (decision.py).
     """
     model, metadata = _load_model()
 
-    features = pd.DataFrame([{
+    values = {
         'rainfall_mm': float(rainfall_mm),
+        'antecedent_rain_mm': float(antecedent_rain_mm),
         'water_level_cm': float(water_level_cm),
         'elevation_m': to_model_elevation(elevation_m),
         'drainage_score': drainage_quality_to_score(drainage_quality),
-    }], columns=FEATURE_COLUMNS)
+    }
+    # Use the columns the saved model was trained on, so an older 4-feature model still works.
+    columns = metadata.get('feature_columns', FEATURE_COLUMNS)
+    features = pd.DataFrame([values], columns=columns)
 
     levels, confidences = decide_levels(model.classes_, model.predict_proba(features))
 

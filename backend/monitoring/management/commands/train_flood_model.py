@@ -17,6 +17,10 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS(
             f"Trained model {metadata['model_version']} on {metadata['n_samples']} samples."
         ))
+        self.stdout.write(f"Heavy-rain level used for training: {metadata['heavy_rain_mm']:.0f} mm")
+        self.stdout.write(f"Rainfall inputs: {metadata['rainfall_source']}")
+        self.stdout.write(f"Features: {', '.join(metadata['feature_columns'])}")
+
         def show(title, accuracy, report):
             self.stdout.write(title)
             self.stdout.write(f"  Overall accuracy: {accuracy:.3f}")
